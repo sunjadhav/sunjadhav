@@ -4,12 +4,8 @@ const dashboard = document.getElementById("dashboard");
 const sheetTabs = document.getElementById("sheetTabs");
 const themeToggle = document.getElementById("themeToggle");
 
-// Dark mode toggle
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-});
+themeToggle.addEventListener("click", () => document.body.classList.toggle("dark"));
 
-// Drag and drop
 dropZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropZone.style.borderColor = "green";
@@ -21,25 +17,20 @@ dropZone.addEventListener("drop", (e) => {
   e.preventDefault();
   handleFile(e.dataTransfer.files[0]);
 });
+fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
-// File upload
-fileInput.addEventListener("change", (e) => {
-  handleFile(e.target.files[0]);
-});
-
-// File handler
 function handleFile(file) {
   if (!file) return;
   const reader = new FileReader();
   if (file.name.endsWith(".csv")) {
     reader.onload = e => processCSV(e.target.result);
     reader.readAsText(file);
-  } else if (file.name.endsWith(".xlsx")) {
+  } else {
     reader.onload = e => {
-      const workbook = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-      displaySheets(workbook);
+      const workbook = XLSX.read(e.target.result, { type: "binary" });
+      loadSheets(workbook);
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsBinaryString(file);
   }
 }
 
@@ -55,7 +46,7 @@ function processCSV(csvText) {
   renderDashboard("CSV Sheet", data);
 }
 
-function displaySheets(workbook) {
+function loadSheets(workbook) {
   sheetTabs.innerHTML = "";
   workbook.SheetNames.forEach(name => {
     const btn = document.createElement("button");
@@ -67,69 +58,86 @@ function displaySheets(workbook) {
     };
     sheetTabs.appendChild(btn);
   });
-
-  // Auto-load first sheet
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const firstData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
-  renderDashboard(workbook.SheetNames[0], firstData);
+  renderDashboard(workbook.SheetNames[0], XLSX.utils.sheet_to_json(firstSheet, { defval: "" }));
 }
 
-function renderDashboard(sheetName, data) {
+function renderDashboard(name, data) {
   dashboard.innerHTML = "";
   if (!data.length) return;
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<h2>${name}</h2>`;
 
   const keys = Object.keys(data[0]);
   const numeric = keys.filter(k => !isNaN(parseFloat(data[0][k])));
-  const card = document.createElement("div");
-  card.className = "card";
+  const categoricals = keys.filter(k => !numeric.includes(k));
 
-  card.innerHTML = `<h2>${sheetName}</h2>`;
-
-  // Summary
-  let summary = "<h3>Summary</h3><table><tr><th>Column</th><th>Mean</th><th>Median</th><th>Min</th><th>Max</th><th>Std Dev</th></tr>";
-  numeric.forEach(col => {
-    const vals = data.map(d => parseFloat(d[col])).filter(v => !isNaN(v));
-    if (!vals.length) return;
-    const mean = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
-    const median = vals.sort((a, b) => a - b)[Math.floor(vals.length / 2)];
-    const std = Math.sqrt(vals.map(v => (v - mean) ** 2).reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
-    summary += `<tr><td>${col}</td><td>${mean}</td><td>${median}</td><td>${Math.min(...vals)}</td><td>${Math.max(...vals)}</td><td>${std}</td></tr>`;
-  });
-  summary += "</table>";
-  card.innerHTML += summary;
-
-  // Charts
-  numeric.slice(0, 2).forEach(col => {
-    const labels = data.map((_, i) => `Row ${i + 1}`);
-    const values = data.map(d => parseFloat(d[col]) || 0);
-
-    const canvas = document.createElement("canvas");
-    const download = document.createElement("button");
-    download.textContent = "Download Chart";
-    download.className = "download-btn";
-    download.onclick = () => {
-      const link = document.createElement("a");
-      link.download = `${col}_chart.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-    };
-
-    card.appendChild(download);
-    card.appendChild(canvas);
-
-    new Chart(canvas.getContext("2d"), {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: col,
-          data: values,
-          backgroundColor: "rgba(75, 192, 192, 0.6)"
-        }]
-      },
-      options: { responsive: true }
+  // Pie/Donut for top category breakdown
+  if (categoricals.length && numeric.length) {
+    const catKey = categoricals[0];
+    const numKey = numeric[0];
+    const grouped = {};
+    data.forEach(row => {
+      grouped[row[catKey]] = (grouped[row[catKey]] || 0) + parseFloat(row[numKey] || 0);
     });
+    const labels = Object.keys(grouped);
+    const values = Object.values(grouped);
+
+    createChart(card, labels, values, `Top ${catKey} by ${numKey}`, "pie");
+  }
+
+  // Line chart for time series
+  const dateKey = keys.find(k => /date/i.test(k));
+  if (dateKey && numeric.length) {
+    const sorted = [...data].sort((a, b) => new Date(a[dateKey]) - new Date(b[dateKey]));
+    const labels = sorted.map(d => d[dateKey]);
+    const values = sorted.map(d => parseFloat(d[numeric[0]]) || 0);
+    createChart(card, labels, values, `${numeric[0]} Over Time`, "line");
+  }
+
+  // Bar charts for top numeric fields
+  numeric.forEach(numKey => {
+    const labels = data.map((_, i) => `Row ${i + 1}`);
+    const values = data.map(d => parseFloat(d[numKey]) || 0);
+    createChart(card, labels, values, numKey, "bar");
   });
 
   dashboard.appendChild(card);
+}
+
+function createChart(container, labels, values, title, type) {
+  const canvas = document.createElement("canvas");
+  const download = document.createElement("button");
+  download.textContent = "Download Chart";
+  download.className = "download-btn";
+  download.onclick = () => {
+    const link = document.createElement("a");
+    link.download = `${title}_chart.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+  };
+  container.appendChild(download);
+  container.appendChild(canvas);
+
+  new Chart(canvas.getContext("2d"), {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label: title,
+        data: values,
+        backgroundColor: type === "pie" ? generateColors(labels.length) : "rgba(75, 192, 192, 0.6)",
+        borderColor: "rgba(0,0,0,0.1)",
+        borderWidth: 1
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: type === "pie" } } }
+  });
+}
+
+function generateColors(n) {
+  return Array.from({ length: n }, (_, i) =>
+    `hsl(${(i * 360) / n}, 70%, 60%)`
+  );
 }
