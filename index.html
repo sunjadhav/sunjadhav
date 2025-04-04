@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sunil Jadhav Portfolio</title>
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif;}
+    body {background-color: #121212; color: #f0f0f0; line-height: 1.6;}
+    header, footer {background: #1f1f1f; padding: 1rem; text-align: center;}
+    nav a {color: #ff9800; margin: 0 10px; text-decoration: none;}
+    .hero {text-align: center; padding: 3rem 1rem;}
+    .hero img {border-radius: 50%; width: 150px; height: 150px; border: 4px solid #ff9800;}
+    h1, h2 {color: #ff9800; margin-bottom: 1rem;}
+    section {padding: 2rem 10%; max-width: 1000px; margin: auto;}
+    .editable {border: 1px dashed #666; padding: 10px; border-radius: 5px;}
+    .edit-btn {background: #ff9800; border: none; color: #000; padding: 5px 10px; margin: 10px 0; cursor: pointer; display: none;}
+    .login-popup {position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1f1f1f; padding: 20px; border-radius: 8px; display: none; text-align: center;}
+    .login-popup input {padding: 10px; margin: 10px; width: 200px;}
+    .hidden {display: none;}
+    .show {display: block;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sunil Jadhav</h1>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button onclick="openLoginPopup()" style="position:absolute; top:10px; right:10px; background:#ff9800; padding:6px 12px; border:none; cursor:pointer;">Admin Login</button>
+  </header>
+
+  <div class="login-popup" id="loginPopup">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Username"/><br/>
+    <input type="password" id="password" placeholder="Password"/><br/>
+    <button onclick="login()">Login</button>
+    <p id="loginError" style="color:red;"></p>
+    <button onclick="closeLoginPopup()">Close</button>
+  </div>
+
+  <section class="hero">
+    <img src="profile.jpg" alt="Sunil Jadhav"/>
+    <h2>Delivery Module Lead | Java Backend Developer</h2>
+    <p>7+ years of experience in building scalable enterprise software using Spring Boot and Microservices architecture.</p>
+  </section>
+
+  <section id="about">
+    <h2>About</h2>
+    <div id="aboutContent" class="editable" contenteditable="false">Results-driven Software Engineer with expertise in Java, Microservices, and cloud-native development. Skilled in leading high-performing teams and delivering scalable backend systems.</div>
+    <button class="edit-btn" onclick="toggleEdit('aboutContent')">Edit</button>
+  </section>
+
+  <section id="skills">
+    <h2>Skills</h2>
+    <div id="skillsContent" class="editable" contenteditable="false">Java, Spring Boot, Microservices, Hibernate, JPA, Kafka, Redis, RabbitMQ, MongoDB, PostgreSQL, MySQL, Docker, Jenkins, GitHub, Azure, AWS, REST APIs, Agile.</div>
+    <button class="edit-btn" onclick="toggleEdit('skillsContent')">Edit</button>
+  </section>
+
+  <section id="experience">
+    <h2>Experience</h2>
+    <div id="experienceContent" class="editable" contenteditable="false">
+      <b>Mphasis Pvt. Ltd. | Delivery Module Lead (Oct 2023 - Present)</b><br/>
+      - Spearheading the development of scalable cloud-based applications.<br/>
+      - Leading a team and managing delivery of microservices with Kafka & Redis.<br/><br/>
+      <b>Quick Digital Technology Pvt. Ltd. | Sr. Software Engineer (Oct 2021 – Oct 2023)</b><br/>
+      - Worked on projects like Raaho Load Board and L&T SuFin.<br/>
+      - Built reusable microservices for authentication, payments, and logistics.<br/><br/>
+      <b>Sourcico Pvt. Ltd. | Java Developer (Mar 2021 – Oct 2021)</b><br/>
+      - Developed Spring Boot backend for HP TechPulse.<br/>
+      - Integrated Kafka, MongoDB, Elasticsearch in scalable system.<br/><br/>
+      <b>Ubitech Solutions | Software Engineer (Nov 2018 – Mar 2021)</b><br/>
+      - Delivered ERP modules for Payroll, HR, Recruitment.<br/>
+      - Used Struts2, JSP, Hibernate, MySQL.
+    </div>
+    <button class="edit-btn" onclick="toggleEdit('experienceContent')">Edit</button>
+  </section>
+
+  <section id="projects">
+    <h2>Projects</h2>
+    <div id="projectsContent" class="editable" contenteditable="false">
+      <b>HP TechPulse:</b> Developed analytics platform for device health using Kafka, MongoDB, Elasticsearch.<br/>
+      <b>Raaho Load Board:</b> Backend logistics platform with trip planning, shipment tracking, Kafka, Redis.<br/>
+      <b>L&T SuFin:</b> Industrial commerce system with vendor onboarding, payment, order modules using Spring Boot.<br/>
+      <b>ERP HRMS:</b> HR/payroll system built with Java, Struts2, Hibernate.
+    </div>
+    <button class="edit-btn" onclick="toggleEdit('projectsContent')">Edit</button>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <div id="contactContent" class="editable" contenteditable="false">
+      Email: suniljadhav790@gmail.com<br/>
+      LinkedIn: <a href="https://linkedin.com/in/sun-profile" target="_blank">linkedin.com/in/sun-profile</a>
+    </div>
+    <button class="edit-btn" onclick="toggleEdit('contactContent')">Edit</button>
+  </section>
+
+  <footer>&copy; 2025 Sunil Jadhav</footer>
+
+  <script>
+    function openLoginPopup() {
+      document.getElementById("loginPopup").style.display = "block";
+    }
+    function closeLoginPopup() {
+      document.getElementById("loginPopup").style.display = "none";
+    }
+    function login() {
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+      if (u === "admin" && p === "sunil123") {
+        closeLoginPopup();
+        document.querySelectorAll(".edit-btn").forEach(btn => btn.style.display = "inline-block");
+        alert("Login successful! You can now edit sections.");
+      } else {
+        document.getElementById("loginError").innerText = "Incorrect username or password.";
+      }
+    }
+    function toggleEdit(id) {
+      const el = document.getElementById(id);
+      const isEditable = el.contentEditable === "true";
+      el.contentEditable = !isEditable;
+      if (!isEditable) {
+        localStorage.setItem(id, el.innerHTML);
+        alert("Changes saved.");
+      }
+    }
+    window.onload = () => {
+      ["aboutContent", "skillsContent", "experienceContent", "projectsContent", "contactContent"].forEach(id => {
+        const saved = localStorage.getItem(id);
+        if (saved) document.getElementById(id).innerHTML = saved;
+      });
+    }
+  </script>
+</body>
+</html>
