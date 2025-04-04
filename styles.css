@@ -1,32 +1,31 @@
 :root {
-  --bg-color: #f4f6f8;
-  --text-color: #333;
-  --card-bg: white;
+  --bg: #f0f2f5;
+  --text: #111;
+  --card: #fff;
   --accent: #007bff;
 }
 
 body.dark {
-  --bg-color: #1c1e21;
-  --text-color: #f0f0f0;
-  --card-bg: #2c2f33;
+  --bg: #181a1b;
+  --text: #eee;
+  --card: #262a2d;
   --accent: #66aaff;
 }
 
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--bg);
+  color: var(--text);
   margin: 0;
-  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 header {
-  background: var(--card-bg);
+  background: var(--card);
   padding: 1em;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 h1 {
@@ -36,6 +35,10 @@ h1 {
 #themeToggle {
   padding: 6px 12px;
   cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
 }
 
 #dropZone {
@@ -44,43 +47,41 @@ h1 {
   margin: 20px;
   border: 2px dashed var(--accent);
   border-radius: 8px;
-  background: var(--card-bg);
-}
-
-input[type="file"] {
-  margin-top: 10px;
+  background: var(--card);
 }
 
 #sheetTabs button {
   margin: 5px;
   padding: 10px;
-  border: none;
   background: var(--accent);
-  color: white;
-  cursor: pointer;
+  color: #fff;
+  border: none;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .card {
-  background: var(--card-bg);
+  background: var(--card);
   border-radius: 10px;
   padding: 20px;
-  margin: 20px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin: 20px auto;
+  width: 90%;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 canvas {
   max-width: 100%;
-  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 .download-btn {
   float: right;
+  margin-top: -10px;
+  margin-bottom: 10px;
   background: var(--accent);
   border: none;
   color: white;
   padding: 5px 10px;
-  margin-bottom: 5px;
   border-radius: 5px;
   cursor: pointer;
 }
